@@ -1,0 +1,90 @@
+@import "tailwindcss";
+
+:root {
+  --background: #0a0e17;
+  --foreground: #e8eaf0;
+  --primary-color: #c0c0c0;
+  --secondary-color: #1a1f2e;
+  --accent-color: #6366f1;
+  --card-color: #131824;
+  --body-color: #0a0e17;
+  --primary-text-color: #ffffff;
+  --secondary-text-color: #8b92a8;
+  --border-color: #2a3142;
+  --input-background: #151a27;
+  --muted-foreground: #6b7280;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+
+  --color-primary: var(--primary-color);
+  --color-secondary: var(--secondary-color);
+  --color-accent: var(--accent-color);
+  --color-card: var(--card-color);
+  --color-body: var(--body-color);
+  --color-primary-text: var(--primary-text-color);
+  --color-secondary-text: var(--secondary-text-color);
+  --color-border: var(--border-color);
+  --color-input-bg: var(--input-background);
+  --color-muted: var(--muted-foreground);
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-display);
+}
+
+button {
+  cursor: pointer !important;
+}
+
+/* Swiper Custom Styles */
+.swiper-pagination-bullet {
+  background: white;
+  opacity: 0.5;
+  transition: opacity 0.3s, background 0.3s, transform 0.3s;
+  width: 10px;
+  height: 10px;
+}
+
+.swiper-pagination-bullet-active {
+  background: white;
+  opacity: 1;
+  transform: scale(1.2);
+}
+
+.hero-swiper-button-next,
+.hero-swiper-button-prev,
+.slider-swiper-button-next,
+.slider-swiper-button-prev,
+.movie-row-next,
+.movie-row-prev {
+  transition: all 0.3s ease;
+}
+
+.hero-swiper-button-next:hover,
+.hero-swiper-button-prev:hover,
+.slider-swiper-button-next:hover,
+.slider-swiper-button-prev:hover,
+.movie-row-next:hover,
+.movie-row-prev:hover {
+  background: var(--accent-color) !important;
+  color: black !important;
+}
+
+/* Movie Row Specific Styles */
+.movie-row-swiper .swiper-slide {
+  margin-right: 10px; /* Default margin */
+}
+
+.movie-row-swiper .swiper-slide:last-child {
+  margin-right: 0;
+}
+
