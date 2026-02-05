@@ -1,14 +1,8 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
 import ProfileForm from '@/components/Generic/ProfileForm'
+import { requireAuth } from '@/lib/auth/route-protection'
 
 export default async function Profile() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/signin')
-  }
+const user = await requireAuth() 
 
   return (
     <div className="min-h-screen p-8">

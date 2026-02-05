@@ -1,14 +1,7 @@
-import { redirect } from 'next/navigation'
-import { createClient } from '@/lib/supabase/server'
-import Link from 'next/link'
+import { requireAuth } from '@/lib/auth/route-protection'
 
 export default async function Dashboard() {
-  const supabase = await createClient()
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    redirect('/signin')
-  }
+const user = await requireAuth() 
 
   return (
     <div className="min-h-screen">
