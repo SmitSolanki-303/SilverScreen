@@ -139,10 +139,12 @@ export const tmdbService = {
   // Get detailed movie by ID (includes additional info like budget, revenue, etc.)
   getDetailedMovieById: async (id: number): Promise<any> => {
     try {
+      console.log(`[tmdbService] Fetching detailed movie for ID: ${id}`);
       const response: any = await tmdb.fetchFromEndpoint(`/movie/${id}?append_to_response=credits,videos,images,recommendations,similar`);
+      console.log(`[tmdbService] Successfully fetched detailed movie: ${response.title || 'Unknown'}`);
       return response;
     } catch (error) {
-      console.error(`Error fetching detailed movie with ID ${id}:`, error);
+      console.error(`[tmdbService] Error fetching detailed movie with ID ${id}:`, error);
       throw error;
     }
   },

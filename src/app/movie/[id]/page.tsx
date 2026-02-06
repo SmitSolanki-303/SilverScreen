@@ -1,6 +1,8 @@
 import React from 'react';
-import { tmdbService, getGenreName } from '@/lib/services/tmdbService';
+import { getGenreName } from '@/lib/services/tmdbService';
+import { getMovieById } from '@/lib/data-fetching';
 import Link from 'next/link';
+import { tmdbService } from '@/lib/services/tmdbService';
 
 interface Genre {
   id: number;
@@ -53,16 +55,37 @@ interface MovieDetails {
   vote_count: number;
 }
 
+interface SimilarMovie {
+  id: number;
+  title: string;
+  year: number;
+  rating: number;
+  runtime: number;
+  genre: string;
+  poster: string;
+  description: string;
+  trending: boolean;
+}
+
 // Function to fetch movie details from TMDB API
-const fetchMovieDetails = async (id: string): Promise<MovieDetails> => {
+const fetchMovieDetails = async (id: string): Promise<MovieDetails | null> => {
   // Validate the ID before making the API call
   const numericId = parseInt(id);
   if (isNaN(numericId)) {
-    throw new Error(`Invalid movie ID: ${id}`);
+    console.error(`Invalid movie ID: ${id}`);
+    return null;
   }
 
   try {
-    const movie = await tmdbService.getDetailedMovieById(numericId);
+    console.log(`[MovieDetailPage] Fetching movie details for ID: ${numericId}`);
+    const movie = await getMovieById(numericId);
+
+    if (!movie || !movie.id) {
+      console.error(`[MovieDetailPage] No movie data returned for ID ${numericId}`);
+      return null;
+    }
+
+    console.log(`[MovieDetailPage] Successfully fetched movie: ${movie.title}`);
 
     // Map the detailed movie response to our MovieDetails interface
     return {
@@ -93,36 +116,8 @@ const fetchMovieDetails = async (id: string): Promise<MovieDetails> => {
       vote_count: movie.vote_count || 0
     };
   } catch (error) {
-    console.error(`Error fetching movie details for ID ${id}:`, error);
-
-    // Return a minimal movie object in case of error
-    return {
-      adult: false,
-      backdrop_path: "",
-      belongs_to_collection: null,
-      budget: 0,
-      genres: [],
-      homepage: "",
-      id: numericId,
-      imdb_id: "",
-      original_language: "",
-      original_title: "Unknown Title",
-      overview: "Unable to load movie details",
-      popularity: 0,
-      poster_path: "",
-      production_companies: [],
-      production_countries: [],
-      release_date: "",
-      revenue: 0,
-      runtime: 0,
-      spoken_languages: [],
-      status: "",
-      tagline: "",
-      title: "Unknown Title",
-      video: false,
-      vote_average: 0,
-      vote_count: 0
-    };
+    console.error(`[MovieDetailPage] Error fetching movie details for ID ${id}:`, error);
+    return null;
   }
 };
 
@@ -148,8 +143,23 @@ const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
 
   const movie = await fetchMovieDetails(movieId);
 
+  // Handle case where movie data couldn't be fetched
+  if (!movie) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+        <div className="text-center">
+          <h1 className="text-3xl font-bold mb-4">Movie Not Found</h1>
+          <p className="text-xl mb-4">Unable to load movie details. The movie may not exist or there was an error fetching the data.</p>
+          <Link href="/" className="text-blue-400 hover:underline mt-4 inline-block">
+            Go back to home
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   // Fetch similar movies
-  let similarMovies = [];
+  let similarMovies: SimilarMovie[] = [];
   try {
     const rawSimilarMovies = await tmdbService.getSimilarMovies(parseInt(movieId));
     similarMovies = rawSimilarMovies.map(rawMovie => ({
@@ -208,7 +218,7 @@ const MovieDetailPage = async ({ params }: { params: { id: string } }) => {
               )}
             </div>
 
-            <div className="flex-grow">
+            <div className="grow">
               <h1 className="text-4xl md:text-5xl font-bold mb-2">{movie.title} ({releaseYear})</h1>
 
               {movie.tagline && (

@@ -83,3 +83,21 @@ export const searchMovies = async (query: string) => {
     return [];
   }
 }
+
+export const getMovieById = async (id: number) => {
+  try {
+    console.log(`[data-fetching] Fetching movie with ID: ${id}`);
+    const tmdbMovie = await tmdbService.getDetailedMovieById(id);
+    
+    if (!tmdbMovie || !tmdbMovie.id) {
+      console.error(`[data-fetching] No movie data returned for ID ${id}`);
+      return null;
+    }
+
+    console.log(`[data-fetching] Successfully fetched movie: ${tmdbMovie.title}`);
+    return tmdbMovie;
+  } catch (error) {
+    console.error(`[data-fetching] Error fetching movie with ID ${id}:`, error);
+    return null;
+  }
+}

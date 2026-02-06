@@ -1,7 +1,7 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 
-export async function middleware(request) {
+export async function proxy(request: Request) {
   let supabaseResponse = NextResponse.next({
     request,
   })
@@ -9,7 +9,7 @@ export async function middleware(request) {
   // Check if environment variables are available
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
   const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-  
+
   if (!supabaseUrl || !supabaseAnonKey) {
     console.error('Missing Supabase environment variables')
     return supabaseResponse
@@ -21,7 +21,12 @@ export async function middleware(request) {
     {
       cookies: {
         getAll() {
-          return request.cookies.getAll()
+          // Extract cookies from the request headers
+          const cookieHeader = request.headers.get('Cookie') ?? '';
+          return cookieHeader.split(';').map(cookieStr => {
+            const [name, value] = cookieStr.trim().split('=');
+            return { name, value: value || '' };
+          });
         },
         setAll(cookiesToSet) {
           // Only set cookies on the response, not on the request
@@ -38,7 +43,8 @@ export async function middleware(request) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const pathname = request.nextUrl.pathname
+  const url = new URL(request.url);
+  const pathname = url.pathname
 
   // Define protected routes (require authentication)
   const protectedRoutes = ['/dashboard', '/profile']

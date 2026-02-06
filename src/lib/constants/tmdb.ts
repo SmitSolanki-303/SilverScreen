@@ -23,12 +23,14 @@ export const tmdb = {
     const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
 
     if (!apiKey || apiKey.trim() === '') {
-      console.error('TMDB API key is not configured or is empty');
+      console.error('[tmdb] TMDB API key is not configured or is empty');
       throw new Error('TMDB API key is not configured or is empty');
     }
 
     // Generate the URL with the dynamic endpoint and API key
-    const url = `${BASE_URL}${endpoint}?api_key=${apiKey}`;
+    const url = `${BASE_URL}${endpoint}${endpoint.includes('?') ? '&' : '?'}api_key=${apiKey}`;
+    
+    console.log(`[tmdb] Fetching from endpoint: ${endpoint}`);
 
     try {
       // Using a timeout and retry mechanism to handle network issues
@@ -44,36 +46,39 @@ export const tmdb = {
           'User-Agent': 'Silver-Screen-App/1.0'
         },
         signal: controller.signal,
-        // Use next.js cache option for server-side caching
-        next: { revalidate: 3600 } // Cache for 1 hour (3600 seconds)
+        // Reduce cache time and use force-cache for better reliability
+        cache: 'force-cache',
+        next: { revalidate: 300 } // Cache for 5 minutes (300 seconds) for fresher data
       });
 
       clearTimeout(timeoutId);
 
       if (!res.ok) {
-        console.error(`Failed to fetch from ${endpoint}: ${res.status} ${res.statusText}`);
+        console.error(`[tmdb] Failed to fetch from ${endpoint}: ${res.status} ${res.statusText}`);
         throw new Error(`Failed to fetch from ${endpoint}: ${res.status} ${res.statusText}`);
       }
 
       // Return the JSON format
-      return await res.json();
+      const data = await res.json();
+      console.log(`[tmdb] Successfully fetched data from ${endpoint}`);
+      return data;
     } catch (error: any) {
-      console.error(`Network error when fetching from ${endpoint}:`, error);
+      console.error(`[tmdb] Network error when fetching from ${endpoint}:`, error);
 
       // Check if it's a timeout or network error
       if (error.name === 'AbortError') {
-        console.error('Request timed out');
+        console.error('[tmdb] Request timed out');
         throw new Error('Request timed out while connecting to TMDB API');
       } else if (error.code === 'ECONNRESET' || error.message.includes('ECONNRESET')) {
-        console.error('Connection was reset. This might be due to network restrictions or TMDB API being temporarily unavailable.');
+        console.error('[tmdb] Connection was reset. This might be due to network restrictions or TMDB API being temporarily unavailable.');
         throw new Error('Connection to TMDB API was reset. Please check your network connection or try again later.');
       } else if (error.message?.includes('fetch failed')) {
-        console.error('Fetch failed - this could be due to network issues or an invalid API endpoint');
+        console.error('[tmdb] Fetch failed - this could be due to network issues or an invalid API endpoint');
         throw new Error('Failed to connect to TMDB API. Please verify your API key and network connection.');
       }
 
       if (!apiKey) {
-        console.error('API Key is not set!');
+        console.error('[tmdb] API Key is not set!');
       }
 
       throw error;
