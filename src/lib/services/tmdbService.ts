@@ -65,6 +65,7 @@ export const getGenreNames = (genreIds: number[]): string[] => {
 };
 
 
+// create movie data structure to our own Movie type
 export const mapTmdbMovieToMovie = (tmdbMovie: TmdbMovie): Movie => {
   return {
     id: tmdbMovie.id,

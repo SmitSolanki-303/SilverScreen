@@ -20,7 +20,7 @@ export const tmdb = {
   // Reusable fetch function for making the API calls
   fetchFromEndpoint: async (endpoint: string) => {
     // Re-read the API key for each request to ensure it's available at runtime
-    const apiKey = process.env.NEXT_PUBLIC_TMDB_API_KEY;
+    const apiKey = process.env.TMDB_API_KEY;
 
     if (!apiKey || apiKey.trim() === '') {
       console.error('[tmdb] TMDB API key is not configured or is empty');
